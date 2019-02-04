@@ -86,6 +86,5 @@ fact: (eats nyala leaves)\n\
         actual = self.KB.kb_explain(read.parse_input("fact: (eats nyala leaves)"))
         self.compare(self.expected, actual)
 
-
 if __name__ == '__main__':
     unittest.main()

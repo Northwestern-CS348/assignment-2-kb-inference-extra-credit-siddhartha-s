@@ -4,6 +4,7 @@ from logical_classes import *
 
 verbose = 0
 
+
 class KnowledgeBase(object):
     def __init__(self, facts=[], rules=[]):
         self.facts = facts
@@ -116,6 +117,7 @@ class KnowledgeBase(object):
             print("Invalid ask:", fact.statement)
             return []
 
+
     def kb_retract(self, fact_or_rule):
         """Retract a fact from the KB
 
@@ -130,6 +132,49 @@ class KnowledgeBase(object):
         # Implementation goes here
         # Not required for the extra credit assignment
 
+    def kb_help_explain(self, f_or_r, spaces, final_output):
+
+        if isinstance(f_or_r, Fact):
+            curr_fact = self.facts.index(f_or_r)
+            final_output += " "*spaces
+            final_output += "fact: "
+            final_output += self.facts[curr_fact].statement.__str__()
+            if self.facts[curr_fact].asserted:
+                final_output += " ASSERTED\n"
+            else:
+                final_output += "\n"
+
+            if self.facts[curr_fact].supported_by:
+                for pair in self.facts[curr_fact].supported_by:
+                    final_output += " " * (spaces + 2) + "SUPPORTED BY\n"
+                    for a in pair:
+                        final_output = self.kb_help_explain(a, spaces+4, final_output)
+
+        elif isinstance(f_or_r, Rule):
+            curr_rule = self.rules.index(f_or_r)
+            final_output += " " * spaces
+            final_output += "rule: ("
+            if len(self.rules[curr_rule].lhs) == 1:
+                final_output += self.rules[curr_rule].lhs[0].__str__()
+            else:
+                for lhs_part in self.rules[curr_rule].lhs[:-1]:
+                    final_output += lhs_part.__str__()
+                    final_output += ", "
+                final_output += self.rules[curr_rule].lhs[-1].__str__()
+            final_output += ") -> "
+            final_output += self.rules[curr_rule].rhs.__str__()
+            if self.rules[curr_rule].asserted:
+                final_output += " ASSERTED\n"
+            else:
+                final_output += "\n"
+            if self.rules[curr_rule].supported_by:
+                for pair in self.rules[curr_rule].supported_by:
+                    final_output += " " * (spaces + 2) + "SUPPORTED BY\n"
+                    for a in pair:
+                        final_output = self.kb_help_explain(a, spaces+4, final_output)
+
+        return final_output
+
     def kb_explain(self, fact_or_rule):
         """
         Explain where the fact or rule comes from
@@ -142,6 +187,30 @@ class KnowledgeBase(object):
         """
         ####################################################
         # Student code goes here
+
+        output_str = ""
+
+        spaces = 0
+
+        if isinstance(fact_or_rule, Fact):
+
+            if fact_or_rule in self.facts:
+                output_str = self.kb_help_explain(fact_or_rule, spaces, "")
+
+            else:
+                output_str = "Fact is not in the KB"
+
+        elif isinstance(fact_or_rule, Rule):
+            if fact_or_rule in self.rules:
+                self.kb_help_explain(fact_or_rule,spaces, "")
+
+            else:
+                output_str = "Rule is not in the KB"
+
+        else:
+            return ""
+
+        return output_str
 
 
 class InferenceEngine(object):
